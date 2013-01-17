@@ -1,4 +1,4 @@
-({
+{
     baseUrl: "bin-dev/assets/js/app",
     name: "main",
 	optimize: "uglify2",
@@ -10,4 +10,4 @@
 		compress: false,
 		beautify: true,
 	},
-})
+}
