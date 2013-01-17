@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<script type="text/javascript">
+		if (!window.console) console = {log: function() {}};
+	</script>
+</head>
+<body>
+	<div>
+		<p><input ng-model="name" /></p>
+		<p>hello {{name}}</p>
+	</div>
+	<div ng-controller="MainCtrl">
+		<p>foo = {{foo}}</p>
+	</div>
+	<script data-main="assets/js/main" src="assets/js/require.js"></script>
+</body>
+</html>

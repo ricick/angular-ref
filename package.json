@@ -1,0 +1,11 @@
+{
+    "name" : "angular-ref",
+    "description": "A reference application built using cofeescript, requirejs and angular",
+    "version" : "0.0.1",
+	"jam": {
+		"packageDir": "bin-dev/assets/js/lib"
+	},
+	"dependencies" : {
+		"fs-extra" : "0.3.2"
+	}
+}

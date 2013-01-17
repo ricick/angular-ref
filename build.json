@@ -1,0 +1,13 @@
+({
+    baseUrl: "bin-dev/assets/js/app",
+    name: "main",
+	optimize: "uglify2",
+    out: "bin/assets/js/main.js",
+	mainConfigFile: 'bin-dev/assets/js/app/main.js',
+	preserveLicenseComments: false,
+	wrap: true,
+	uglify: {
+		compress: false,
+		beautify: true,
+	},
+})
