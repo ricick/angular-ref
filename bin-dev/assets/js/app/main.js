@@ -21,7 +21,7 @@
     }
   });
 
-  define(['angular', 'appmodule', 'control/mainctrl'], function() {
+  define(['angular', 'appmodule', 'control/mainctrl', 'directive/appreverse'], function() {
     var appModule;
     console.log("define main file");
     appModule = angular.module('app');

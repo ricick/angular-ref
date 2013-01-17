@@ -11,7 +11,7 @@ requirejs.config
         'angular_resource':
             deps: ['angular']
             exports: 'angular_resource'
-define ['angular', 'appmodule', 'control/mainctrl'], ->
+define ['angular', 'appmodule', 'control/mainctrl', 'directive/appreverse'], ->
 	console.log "define main file"
 	appModule = angular.module 'app'
 	#appModule.config ($locationProvider, $routeProvider) ->

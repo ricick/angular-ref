@@ -9,11 +9,17 @@
 </head>
 <body>
 	<div>
+		<h2>Binding</h2>
 		<p><input ng-model="name" /></p>
 		<p>hello {{name}}</p>
 	</div>
 	<div ng-controller="MainCtrl">
+		<h2>Controller</h2>
 		<p>foo = {{foo}}</p>
+	</div>
+	<div>
+		<h2>Directive</h2>
+		<p app-reverse>Reverse this text</p>
 	</div>
 	<script data-main="assets/js/main" src="assets/js/require.js"></script>
 </body>
