@@ -1,5 +1,13 @@
+COFFEE_SRC="src/coffee"
+LESS_SRC="src/less"
+JS_OUT="bin-dev/assets/js"
+CSS_OUT="bin-dev/assets/css"
+CSS_DEPLOY="bin/assets/css/main.css"
+
 fs = require 'fs-extra'
+less = require 'less'
 util = require 'util'
+cleanCSS = require 'clean-css'
 {print} = require 'sys'
 {spawn, exec} = require 'child_process'
 {log, error} = console; print = log
@@ -18,12 +26,11 @@ shell = (cmds, callback) ->
 		callback() if callback
 	)
 
-walk = (dir, done) ->
+walk = (dir, callback) ->
 	results = []
 	fs.readdir dir, (err, list) ->
-		return done(err, []) if err
+		return callback(err, []) if err
 		pending = list.length
-		#return done(null, results) unless pending
 		for name in list
 			file = "#{dir}/#{name}"
 			try
@@ -33,17 +40,23 @@ walk = (dir, done) ->
 			if stat?.isDirectory()
 				walk file, (err, res) ->
 					results.push name for name in res
-					done(null, results) unless --pending
+					callback(null, results) unless --pending
 			else
 				results.push file
-				done(null, results) unless --pending
+				callback(null, results) unless --pending
   
-build = (callback, watch) ->
+build = (watch, callback) ->
 	log "building app"
+	task_buildLess watch, () ->
+		task_buildCoffee watch, ->
+			callback()
+	
+task_buildCoffee = (watch, callback) ->
+	log "compiling coffeescript files"
 	options = "co"
 	if watch
 		options = "wco"
-	coffee = shell("coffee -#{ options } bin-dev/assets/js/ src/coffee/")
+	coffee = shell("coffee -#{ options } #{JS_OUT} #{COFFEE_SRC}")
 	coffee.stderr.on 'data', (data) ->
 		process.stderr.write data.toString()
 	coffee.stdout.on 'data', (data) ->
@@ -52,6 +65,42 @@ build = (callback, watch) ->
 		#replaceScriptTags "bin"
 		callback?() if code is 0
 
+task_buildLess = (watch, callback) ->
+	log "compiling less files"
+	try
+		fs.mkdirSync CSS_OUT
+	catch err
+	fs.readdir LESS_SRC, (err, files) ->
+		for file in files
+			continue if file[0] == '_'
+			file = "#{LESS_SRC}/#{file}"
+			compileCss file, watch	
+		#log "callback #{callback}"	
+		#callback 5
+			
+compileCss = (filename, watch, callback) ->
+	log "compiling #{filename} to css"
+	temp = filename.split('/').last()
+	out_filename = "#{CSS_OUT}/#{ temp.replace('.less', '.css') }"
+	try
+		src = fs.readFileSync filename, 'utf8'
+		less.render src, (e, css) ->
+			throw e if(e)
+			fs.writeFileSync out_filename, css
+			if watch
+				watchFile( filename, compileCss )
+	catch err
+		if watch
+			watchFile( filename, compileCss )
+
+watchFile = (filename, callback)->
+	fs.watchFile filename, persistent:true, interval:1500 , (curr, prev) -> 
+		fs.unwatchFile filename
+		try
+			callback(filename)
+		catch err
+			null
+		
 deploy = ->
 	build ->
 		###
@@ -65,20 +114,37 @@ deploy = ->
 						other.push filename
 						log "copying #{filename} to deploy"
 						copyname = "deploy/"+filename.substring(4)
-						fs.touchSync(copyname);
+						fs.touchSync copyname
 						fs.copy filename, copyname, (err) ->
 							if (err)
 								console.error(err)
 		###
 	require = shell("node r.js -o build.json")
-	
+	task_compileCss()
+
+task_compileCss = ->
+	log "compiling css files"
+	src = ''
+	walk CSS_OUT, (err, results) ->
+		for filename in results
+			do(filename)->
+				if filename.indexOf(".css") isnt -1
+					content = fs.readFileSync filename, 'utf8'
+					src += content
+		output = cleanCSS.process(src);
+		fs.touchSync CSS_DEPLOY
+		fs.writeFileSync CSS_DEPLOY, output
 	
 task 'build', 'build app', (options) ->
-	build(null, true)
+	build(true)
 	
 task 'build-once', 'build app without watching', (options) ->
 	build()
 	
 task 'deploy', 'build app and compile down to deploy version', (options) ->
 	deploy()
+	
+# Helpers
+String::endsWith= (str) -> this.substr(this.length - str.length) == str
+Array::last= -> this[this.length-1]
 	

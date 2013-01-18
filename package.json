@@ -6,6 +6,8 @@
 		"packageDir": "bin-dev/assets/js/lib"
 	},
 	"dependencies" : {
-		"fs-extra" : "0.3.2"
+		"fs-extra" : "0.3.2",
+		"less" : "1.3.3",
+		"clean-css" : "0.9.1"
 	}
 }
