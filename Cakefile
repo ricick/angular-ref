@@ -49,7 +49,7 @@ build = (watch, callback) ->
 	log "building app"
 	task_buildLess watch, () ->
 		task_buildCoffee watch, ->
-			callback()
+			callback?()
 	
 task_buildCoffee = (watch, callback) ->
 	log "compiling coffeescript files"
@@ -74,10 +74,10 @@ task_buildLess = (watch, callback) ->
 		for file in files
 			continue if file[0] == '_'
 			file = "#{LESS_SRC}/#{file}"
-			compileCss file, watch	
-		#log "callback #{callback}"	
-		#callback 5
-			
+			compileCss file, watch
+		callback?()
+		return true
+
 compileCss = (filename, watch, callback) ->
 	log "compiling #{filename} to css"
 	temp = filename.split('/').last()
@@ -85,8 +85,10 @@ compileCss = (filename, watch, callback) ->
 	try
 		src = fs.readFileSync filename, 'utf8'
 		less.render src, (e, css) ->
+			log "writing"
 			throw e if(e)
 			fs.writeFileSync out_filename, css
+			log "done"
 			if watch
 				watchFile( filename, compileCss )
 	catch err
